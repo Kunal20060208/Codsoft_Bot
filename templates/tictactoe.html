@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Codsoft Bot | Tic Tac Toe</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: #fff;
+    }
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+      text-align: center;
+    }
+    h1, h2, h3 { text-align: center; }
+    .hidden { display: none !important; }
+
+    #board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 2rem auto;
+      width: 300px;
+      height: 300px;
+    }
+    .cell {
+      width: 100px;
+      height: 100px;
+      background: #fff;
+      color: #222;
+      font-size: 2.5rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .cell:hover { background: #f0f0f0; cursor: pointer; }
+
+    #messageOverlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #fff;
+      z-index: 1000;
+      padding: 2rem;
+    }
+    #messageOverlay button {
+      margin-top: 1rem;
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .scoreboard span {
+      display: inline-block;
+      padding: 0.3rem 1rem;
+      background: #111;
+      border-radius: 8px;
+      min-width: 40px;
+      margin: 0 5px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.5rem;
+      text-align: center;
+      background: rgba(255,255,255,0.05);
+    }
+    th { background: #222; cursor: pointer; }
+
+    button {
+      padding: 0.6rem 1rem;
+      margin: 0.5rem;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      color: white;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 1rem;
+      color: #00c6ff;
+      text-decoration: none;
+      font-size: 1rem;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    select {
+      padding: 0.4rem;
+      margin-left: 0.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    label {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 1rem 0;
+      font-size: 1.1rem;
+    }
+
+    @media (max-width: 480px) {
+      #board {
+        width: 260px;
+        height: 260px;
+      }
+      .cell {
+        width: 80px;
+        height: 80px;
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container" id="setup">
+  <h1>Tic Tac Toe</h1>
+  <label>Choose your symbol:
+    <select id="playerSymbol">
+      <option value="X">X</option>
+      <option value="O">O</option>
+    </select>
+  </label>
+  <label>Who plays first?
+    <select id="firstPlayer">
+      <option value="user">You</option>
+      <option value="bot">Codsoft Bot</option>
+    </select>
+  </label>
+  <label>Choose your difficulty:
+    <select id="difficulty">
+      <option value="easy">Easy</option>
+      <option value="medium">Medium</option>
+      <option value="hard">Hard</option>
+    </select>
+  </label>
+  <div style="margin-top: 1rem;">
+    <button onclick="startGame()">Start Game</button>
+    <button onclick="viewScoreboard()">View Scoreboard</button>
+  </div>
+  
+  <div style="margin-top: 1.5rem;">
+    <a href="/" style="font-size: 1rem; color: #00c6ff; text-decoration: none;">Back to Home</a>
+  </div>
+</div>
+
+<div class="container hidden" id="gameArea">
+  <h2>Game in Progress</h2>
+  <div class="scoreboard">
+    You: <span id="userScore">0</span>
+    Bot: <span id="botScore">0</span>
+    Draws: <span id="drawCount">0</span>
+    Streak: <span id="streak">0</span>
+  </div>
+  <div id="board"></div>
+  <p id="status"></p>
+  <button onclick="goBackToSetup()">Back</button>
+</div>
+
+<div class="container hidden" id="scoreboardArea">
+  <h2>Scoreboard</h2>
+  <table id="historyTable">
+    <thead>
+      <tr>
+        <th onclick="sortTable(0)">Game</th>
+        <th onclick="sortTable(1)">Result</th>
+        <th onclick="sortTable(2)">Difficulty</th>
+        <th onclick="sortTable(3)">Streak</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <button onclick="clearHistory()">Clear History</button>
+  <button onclick="exportPDF()">Export PDF</button>
+  <button onclick="exportExcel()">Export Excel</button>
+  <button onclick="returnToMain()">Back</button>
+</div>
+
+<div id="messageOverlay" class="hidden"></div>
+
+<script>
+  let gameData = [], gameCounter = 0, userScore = 0, botScore = 0, drawCount = 0, currentStreak = 0;
+  let cells = [], currentPlayer = "", playerSymbol = "X", botSymbol = "O", difficulty = "easy";
+  const board = document.getElementById("board"), overlay = document.getElementById("messageOverlay");
+
+  function startGame() {
+    document.getElementById("setup").classList.add("hidden");
+    document.getElementById("scoreboardArea").classList.add("hidden");
+    document.getElementById("gameArea").classList.remove("hidden");
+    cells = Array(9).fill(null);
+    playerSymbol = document.getElementById("playerSymbol").value;
+    botSymbol = playerSymbol === "X" ? "O" : "X";
+    currentPlayer = document.getElementById("firstPlayer").value;
+    difficulty = document.getElementById("difficulty").value;
+    renderBoard();
+    loadScores();
+    if (currentPlayer === "bot") setTimeout(botMove, 500);
+  }
+
+  function renderBoard() {
+    board.innerHTML = "";
+    cells.forEach((val, i) => {
+      const div = document.createElement("div");
+      div.className = "cell";
+      div.textContent = val || "";
+      div.onclick = () => handleClick(i);
+      board.appendChild(div);
+    });
+  }
+
+  function handleClick(i) {
+    if (cells[i] || currentPlayer !== "user") return;
+    cells[i] = playerSymbol;
+    renderBoard();
+    let winner = checkWinner();
+    if (winner) return endGame(winner);
+    currentPlayer = "bot";
+    setTimeout(botMove, 500);
+  }
+
+  function botMove() {
+    let empty = cells.map((v, i) => v === null ? i : null).filter(i => i !== null);
+    let move;
+
+    if (difficulty === "easy") {
+      move = randomMove(empty);
+    } else if (difficulty === "medium") {
+      move = mediumMove(empty);
+    } else {
+      move = hardMove(empty);
+    }
+
+    cells[move] = botSymbol;
+    renderBoard();
+    let winner = checkWinner();
+    if (winner) return endGame(winner);
+    currentPlayer = "user";
+  }
+
+  function randomMove(empty) {
+    return empty[Math.floor(Math.random() * empty.length)];
+  }
+
+  function mediumMove(empty) {
+    for (let i = 0; i < empty.length; i++) {
+      let index = empty[i];
+      cells[index] = botSymbol;
+      if (checkWinner() === botSymbol) {
+        return index;
+      }
+      cells[index] = null;
+    }
+
+    for (let i = 0; i < empty.length; i++) {
+      let index = empty[i];
+      cells[index] = playerSymbol;
+      if (checkWinner() === playerSymbol) {
+        cells[index] = null;
+        return index;
+      }
+      cells[index] = null;
+    }
+
+    return randomMove(empty);
+  }
+
+  function hardMove(empty) {
+    for (let i = 0; i < empty.length; i++) {
+      let index = empty[i];
+      cells[index] = botSymbol;
+      if (checkWinner() === botSymbol) {
+        return index;
+      }
+      cells[index] = null;
+    }
+
+    for (let i = 0; i < empty.length; i++) {
+      let index = empty[i];
+      cells[index] = playerSymbol;
+      if (checkWinner() === playerSymbol) {
+        cells[index] = null;
+        return index;
+      }
+      cells[index] = null;
+    }
+
+    return bestMove();
+  }
+
+  function bestMove() {
+    const minimax = (b, depth, isMax) => {
+      let winner = checkWinner();
+      if (winner === botSymbol) return { score: 10 - depth };
+      if (winner === playerSymbol) return { score: depth - 10 };
+      if (!b.includes(null)) return { score: 0 };
+
+      let best = isMax ? { score: -Infinity } : { score: Infinity };
+
+      b.forEach((v, i) => {
+        if (v === null) {
+          b[i] = isMax ? botSymbol : playerSymbol;
+          let result = minimax(b, depth + 1, !isMax).score;
+          b[i] = null;
+          if (isMax) {
+            if (result > best.score) best = { score: result, index: i };
+          } else {
+            if (result < best.score) best = { score: result, index: i };
+          }
+        }
+      });
+      return best;
+    };
+    return minimax(cells.slice(), 0, true).index;
+  }
+
+  function checkWinner() {
+    const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    for (let [a,b,c] of lines) if (cells[a] && cells[a] === cells[b] && cells[a] === cells[c]) return cells[a];
+    return cells.includes(null) ? null : "Draw";
+  }
+
+  function endGame(winner) {
+    gameCounter++;
+    let result = winner === "Draw" ? "Draw" : (winner === playerSymbol ? "You win" : "Bot wins");
+    if (winner === playerSymbol) { userScore++; currentStreak++; }
+    else if (winner === botSymbol) { botScore++; currentStreak = 0; }
+    else { drawCount++; currentStreak = 0; }
+    saveScores();
+    const row = { game: gameCounter, result, difficulty, streak: currentStreak };
+    gameData.push(row);
+    localStorage.setItem("ttt_history_data", JSON.stringify(gameData));
+    renderHistory();
+    setTimeout(() => {
+      overlay.classList.remove("hidden");
+      overlay.innerHTML = `<div>${result}</div>
+        <button onclick='restart()'>Play Again</button>
+        <button onclick='goBackToSetup()'>Back</button>`;
+    }, 500);
+  }
+
+  function restart() {
+    overlay.classList.add("hidden");
+    overlay.innerHTML = "";
+    startGame();
+  }
+
+  function goBackToSetup() {
+    overlay.classList.add("hidden");
+    overlay.innerHTML = "";
+    document.getElementById("gameArea").classList.add("hidden");
+    document.getElementById("setup").classList.remove("hidden");
+  }
+
+  function viewScoreboard() {
+    document.getElementById("setup").classList.add("hidden");
+    document.getElementById("gameArea").classList.add("hidden");
+    document.getElementById("scoreboardArea").classList.remove("hidden");
+    loadScores();
+    renderHistory();
+  }
+
+  function returnToMain() {
+    document.getElementById("scoreboardArea").classList.add("hidden");
+    document.getElementById("setup").classList.remove("hidden");
+  }
+
+  function sortTable(n) {
+    const table = document.getElementById("historyTable");
+    let rows = Array.from(table.rows).slice(1);
+    let asc = table.rows[0].cells[n].getAttribute("data-sort") !== "asc";
+    rows.sort((a, b) => a.cells[n].innerText.localeCompare(b.cells[n].innerText));
+    if (!asc) rows.reverse();
+    rows.forEach(row => table.tBodies[0].appendChild(row));
+    Array.from(table.rows[0].cells).forEach(cell => cell.removeAttribute("data-sort"));
+    table.rows[0].cells[n].setAttribute("data-sort", asc ? "asc" : "desc");
+  }
+
+  function clearHistory() {
+    gameData = [];
+    gameCounter = 0;
+    userScore = 0;
+    botScore = 0;
+    drawCount = 0;
+    currentStreak = 0;
+    localStorage.removeItem("ttt_history_data");
+    document.getElementById("userScore").textContent = "0";
+    document.getElementById("botScore").textContent = "0";
+    document.getElementById("drawCount").textContent = "0";
+    document.getElementById("streak").textContent = "0";
+    renderHistory();
+  }
+
+  function saveScores() {
+    document.getElementById("userScore").textContent = userScore;
+    document.getElementById("botScore").textContent = botScore;
+    document.getElementById("drawCount").textContent = drawCount;
+    document.getElementById("streak").textContent = currentStreak;
+  }
+
+  function loadScores() {
+    let saved = localStorage.getItem("ttt_history_data");
+    if (saved) {
+      gameData = JSON.parse(saved);
+      if (gameData.length > 0) gameCounter = gameData[gameData.length - 1].game;
+    }
+  }
+
+  function renderHistory() {
+    const tbody = document.querySelector("#historyTable tbody");
+    tbody.innerHTML = "";
+    gameData.forEach(r => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${r.game}</td><td>${r.result}</td><td>${r.difficulty}</td><td>${r.streak}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function exportPDF() {
+    const win = window.open('', '', 'height=700,width=900');
+    win.document.write('<html><head><title>Scoreboard</title></head><body>');
+    win.document.write(document.getElementById("historyTable").outerHTML);
+    win.document.write('</body></html>');
+    win.document.close();
+    win.print();
+  }
+
+  function exportExcel() {
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(gameData);
+    XLSX.utils.book_append_sheet(wb, ws, "Scoreboard");
+    XLSX.writeFile(wb, "tic_tac_toe_scoreboard.xlsx");
+  }
+
+  loadScores();
+</script>
+
+</body>
+</html>

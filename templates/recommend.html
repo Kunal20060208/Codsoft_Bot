@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Codsoft Bot | Recommendation System</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: white;
+    }
+    .container {
+      max-width: 700px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      color: #fff;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+    }
+    h1 {
+      margin-bottom: 0.5rem;
+    }
+    form input, form select {
+      padding: 0.6rem;
+      border-radius: 8px;
+      border: none;
+      margin: 1rem 0;
+      width: 90%;
+      font-size: 1rem;
+    }
+    form button {
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.5rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    form button:hover {
+      transform: scale(1.05);
+    }
+    .recommendations {
+      margin-top: 2rem;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 1rem;
+      border-radius: 12px;
+      text-align: left;
+    }
+    .recommendations h3 {
+      text-align: center;
+      color: #00c6ff;
+    }
+    .recommendations ul {
+      list-style: none;
+      padding-left: 1rem;
+    }
+    .recommendations li::before {
+      content: "• ";
+      font-weight: bold;
+    }
+    .stars label {
+      font-size: 1.4rem;
+      color: #888;
+      cursor: pointer;
+    }
+    .stars input[type="radio"]:checked ~ label {
+      color: #ffc107;
+    }
+    .stars input[type="radio"] {
+      display: none;
+    }
+    .summary {
+      margin-top: 1rem;
+      padding: 0.5rem;
+      font-style: italic;
+      color: #ccc;
+      text-align: center;
+    }
+    .rating-label {
+      font-weight: bold;
+      color: #00c6ff;
+      margin-left: 0.5rem;
+    }
+    .load-more {
+      margin: 1rem auto;
+      text-align: center;
+    }
+    .load-more button {
+      margin-top: 10px;
+      padding: 0.4rem 1rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      background: #0072ff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    a {
+      color: #00c6ff;
+      text-decoration: none;
+      font-size: 1rem;
+      display: inline-block;
+      margin-top: 2rem;
+    }
+    @media (max-width: 480px) {
+      .container {
+        padding: 1rem;
+        margin: 1rem;
+      }
+      form input, form select {
+        width: 100%;
+      }
+      .recommendations {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Recommendation System</h1>
+    <p>Type something you like and choose what you'd like to discover.</p>
+
+    <form method="POST" autocomplete="off">
+      <input type="text" name="query" placeholder="Type a movie, book, or product..." required><br>
+
+      <select name="category" id="category" required onchange="toggleRatingField()">
+        <option value="movie">Movies</option>
+        <option value="book">Books</option>
+        <option value="product">Products</option>
+      </select><br>
+
+      <div id="ratingField">
+        <div class="stars">
+          <input type="radio" name="min_rating" value="1" id="rate1"><label for="rate1">★</label>
+          <input type="radio" name="min_rating" value="2" id="rate2"><label for="rate2">★</label>
+          <input type="radio" name="min_rating" value="3" id="rate3"><label for="rate3">★</label>
+          <input type="radio" name="min_rating" value="4" id="rate4"><label for="rate4">★</label>
+          <input type="radio" name="min_rating" value="5" id="rate5"><label for="rate5">★</label>
+        </div>
+      </div>
+
+      <button type="submit">Get Recommendations</button>
+    </form>
+
+    {% if summary %}
+    <div class="summary">
+      {{ summary }}
+    </div>
+    {% endif %}
+
+    {% if recommendations %}
+    <div class="recommendations">
+      <h3>Top Picks for You:</h3>
+      <ul id="resultList">
+        {% for item in recommendations %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+      <div class="load-more">
+        <button onclick="loadMore()">Load More</button>
+      </div>
+    </div>
+    {% endif %}
+
+    <a href="/">Back to Home</a>
+  </div>
+
+  <script>
+    function toggleRatingField() {
+      const cat = document.getElementById('category').value;
+      document.getElementById('ratingField').style.display = (cat === 'movie' || cat === 'book') ? 'block' : 'none';
+    }
+    window.onload = toggleRatingField;
+
+    let visibleItems = 5;
+    function loadMore() {
+      const list = document.getElementById("resultList");
+      const items = list.querySelectorAll("li");
+      for (let i = visibleItems; i < visibleItems + 5 && i < items.length; i++) {
+        items[i].style.display = "list-item";
+      }
+      visibleItems += 5;
+      if (visibleItems >= items.length) {
+        document.querySelector(".load-more").style.display = "none";
+      }
+    }
+
+    // Hide extra results initially for pagination
+    document.addEventListener("DOMContentLoaded", () => {
+      const list = document.getElementById("resultList");
+      if (list) {
+        const items = list.querySelectorAll("li");
+        for (let i = 5; i < items.length; i++) {
+          items[i].style.display = "none";
+        }
+        if (items.length <= 5) {
+          const loadMoreBtn = document.querySelector(".load-more");
+          if (loadMoreBtn) loadMoreBtn.style.display = "none";
+        }
+      }
+    });
+  </script>
+</body>
+</html>

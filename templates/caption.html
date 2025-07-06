@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Codsoft Bot | Image Captioning</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 4rem auto;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    input[type="file"],
+    select {
+      padding: 0.8rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      width: 100%;
+      max-width: 90%;
+      margin-bottom: 1.2rem;
+      border: none;
+    }
+
+    select {
+      background: #fff;
+      color: #000;
+    }
+
+    button {
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 0.8rem 2rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      margin-top: 0.5rem;
+      width: 90%;
+      max-width: 220px;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 1.5rem;
+      color: #00c6ff;
+      text-decoration: none;
+      font-size: 1rem;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      button {
+        padding: 0.6rem 1.5rem;
+        font-size: 0.95rem;
+      }
+
+      input[type="file"], select {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Image Captioning</h1>
+    <form action="/caption" method="POST" enctype="multipart/form-data" autocomplete="off">
+      <input type="file" name="image" accept="image/*" required />
+
+      <label for="style">Choose Caption Style:</label>
+      <select name="style" id="style">
+        <option value="default">Default</option>
+        <option value="funny">Funny</option>
+        <option value="poetic">Poetic</option>
+        <option value="detailed">Detailed</option>
+      </select>
+
+      <button type="submit">Generate Caption</button>
+    </form>
+    <a href="/">Back to Home</a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Codsoft Bot | Caption Result</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 700px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+      text-align: center;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    .container img {
+      max-width: 100%;
+      border-radius: 12px;
+      margin: 1rem 0;
+    }
+    .response-box {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 1rem;
+      border-radius: 10px;
+      margin: 1rem auto;
+      color: white;
+      font-size: 1.1rem;
+    }
+    .response-box strong {
+      color: #00c6ff;
+    }
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .button-row form, .button-row a {
+      margin: 0;
+    }
+    .button-row button {
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      border: none;
+      padding: 0.6rem 1.5rem;
+      color: white;
+      font-size: 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      white-space: nowrap;
+    }
+    .button-row button:hover {
+      transform: scale(1.05);
+    }
+    @media (max-width: 480px) {
+      .container {
+        padding: 1rem;
+        margin: 1rem;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      .response-box {
+        font-size: 1rem;
+      }
+      .button-row {
+        flex-direction: column;
+        gap: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Generated Caption</h1>
+
+    <img src="{{ url_for('static', filename='uploads/' + image_file) }}" alt="Uploaded Image">
+
+    <div class="response-box">
+      <p><strong>Caption:</strong> {{ caption }}</p>
+    </div>
+
+    <div class="button-row">
+      <form action="/caption" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="image_file" value="{{ image_file }}">
+        <input type="hidden" name="style" value="{{ style }}">
+        <button type="submit">Regenerate Caption</button>
+      </form>
+
+      <a href="/caption"><button>Try Another Image</button></a>
+    </div>
+  </div>
+</body>
+</html>

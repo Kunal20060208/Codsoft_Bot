@@ -1,0 +1,10 @@
+pandas
+scikit-learn
+opencv-python
+face_recognition
+dlib
+Pillow
+torch
+torchvision
+cmake
+dlib
