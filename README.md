@@ -76,7 +76,6 @@ App runs on: `http://127.0.0.1:5000`
 ![Tic Tac Toe AI](image-1.png)
 ![Image Captioning](image-2.png)
 ![Recommendation System](image-3.png)
-![Face Detection & Recognition](image-4.png)
 
 ## 📜 License
 
