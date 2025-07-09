@@ -17,4 +17,3 @@ insightface
 numpy
 onnxruntime
 transformers
-gunicorn
