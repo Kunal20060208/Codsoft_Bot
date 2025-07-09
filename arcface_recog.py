@@ -1,12 +1,28 @@
 import onnxruntime as ort
 import numpy as np
 import cv2
+import os
+import urllib.request
 
 class ArcFaceRecognizer:
     def __init__(self, model_path="models/arcface.onnx"):
         self.model_path = model_path
+        self._ensure_model_exists()
         self.session = self._load_model()
         self.input_name = self.session.get_inputs()[0].name
+
+    def _ensure_model_exists(self):
+        """Download model if not found locally to avoid deployment/storage issues."""
+        if not os.path.exists(self.model_path):
+            os.makedirs(os.path.dirname(self.model_path), exist_ok=True)
+            print("[Downloading] ArcFace model...")
+
+            try:
+                url = "https://huggingface.co/onnx/models/resolve/main/arcface.onnx"
+                urllib.request.urlretrieve(url, self.model_path)
+                print("[Downloaded] ArcFace model successfully.")
+            except Exception as e:
+                raise RuntimeError(f"Failed to download ArcFace model: {e}")
 
     def _load_model(self):
         try:
