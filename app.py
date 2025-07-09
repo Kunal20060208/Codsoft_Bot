@@ -8,7 +8,6 @@ import os
 import base64
 from caption_generator import generate_caption
 from recommender import recommend
-from face_recog import detect_face
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
@@ -29,6 +28,8 @@ def chatbot_page():
             response = "Hello! How can I assist you?"
         elif "name" in user_input.lower():
             response = "I'm Codsoft Bot, your AI assistant."
+        elif "how" in user_input.lower():
+            response = "I'm just code, but I'm feeling pretty electric today! How about you?"
         elif "bye" in user_input.lower():
             response = "Goodbye! Come back soon."
         else:
@@ -84,6 +85,8 @@ def face_page():
     output_path = None
 
     if request.method == 'POST':
+        from face_recog import detect_face
+
         if 'captured' in request.form and request.form['captured']:
             data_url = request.form['captured']
             header, encoded = data_url.split(",")
