@@ -8,3 +8,13 @@ torch
 torchvision
 cmake
 dlib
+Flask
+Werkzeug
+IMDbPY
+requests
+python-dotenv
+insightface
+numpy
+onnxruntime
+transformers
+gunicorn
