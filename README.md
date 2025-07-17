@@ -79,8 +79,7 @@ App runs on: `http://127.0.0.1:5500`
 ## 🏅 Internship Completion Certificate
 
 Here's my official **Codsoft AI Internship Completion Certificate** 👇
-
-![Codsoft Certificate](Codsoft_Internship_Certificate.pdf)
+📄 [🔗 View Certificate (PDF)](Codsoft_Internship_Certificate.pdf)
 
 📌 *Awarded for successful completion of the AI Internship by Codsoft in 2025.*
 
